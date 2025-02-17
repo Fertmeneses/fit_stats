@@ -97,12 +97,17 @@ def plot_effec_dist(t_total,t_card,t_abs):
     ax_dist.legend(facecolor='wheat')
     plt.show()
 
-def plot_avg_records(t_total,t_card,t_abs,Dates,
-                     daily=False,weekly=False,moonly=False,quarterly=False,last_years=1):
+def plot_avg_records(
+	t_total,t_card,t_abs,Dates,
+	daily=False,last_years_daily=1,
+	weekly=False,last_years_weekly=1,
+	moonly=False,last_years_moonly=1,
+	quarterly=False,last_years_quarterly=1,
+    ):
     """
     Xxx
     """
-    if not daily and not weekly and not moonly and not quarterly:
+    if daily+weekly+moonly+quarterly==0:
         print('Choose either <daily>, <weekly>, <moonly> and/or <quarterly> equal True.')
     # Define time ranges:
     N_days = len(t_abs) # Number of days so far
@@ -127,85 +132,88 @@ def plot_avg_records(t_total,t_card,t_abs,Dates,
    
     # Plot figures:
     alpha_grid = 0.2
+    n_plots = daily+weekly+moonly+quarterly
+    if n_plots == 1:
+    	fig, ax = plt.subplots(n_plots,1,figsize=(wPlot,hPlot*(n_plots)))
+    	axes = [ax]
+    else:
+    	fig, axes = plt.subplots(n_plots,1,figsize=(wPlot,hPlot*(n_plots)),constrained_layout=True)
+    i_aux = 0 # Start counter
     if daily:
-        N_days = len(t_abs) if last_years==-1 else int(last_years*365) # Number of days to be plotted
+        N_days = len(t_abs) if last_years_daily==-1 else int(last_years_daily*365) # Number of days to be plotted
         if N_days//15>15:
             N_spacing = N_days//15
         elif N_days//15>7:
             N_spacing = N_days//7
         else:
             N_spacing = 7
-        fig, ax = plt.subplots(1,figsize=(wPlot,hPlot))
-        ax.grid(axis='y',alpha=alpha_grid)
-        ax.set_title("Daily series",fontsize=18,color='black')      
-        ax.bar(Dates[-N_days:],t_abs[-N_days:],label='Abs',color=Color_abs)
-        ax.bar(Dates[-N_days:],t_card[-N_days:],bottom=t_abs[-N_days:],label='Cardio',color=Color_cardio)
+        axes[i_aux].grid(axis='y',alpha=alpha_grid)
+        axes[i_aux].set_title("Daily series",fontsize=18,color='black')      
+        axes[i_aux].bar(Dates[-N_days:],t_abs[-N_days:],label='Abs',color=Color_abs)
+        axes[i_aux].bar(Dates[-N_days:],t_card[-N_days:],bottom=t_abs[-N_days:],label='Cardio',color=Color_cardio)
         DateLabel = Dates[-N_days::N_spacing] # Define date labels
         DaysTicks = [i*N_spacing for i in range(len(DateLabel))] # Adjust ticks accordingly
-        ax.set_facecolor("#000000")
-        ax.set_xticks(DaysTicks)
-        ax.set_xticklabels(DateLabel,rotation=30,fontsize=12)
-        ax.legend(facecolor='wheat')
-        ax.set_ylabel('Daily time [min]')
-        fig.tight_layout()
-        #plt.show()
+        axes[i_aux].set_facecolor("#000000")
+        axes[i_aux].set_xticks(DaysTicks)
+        axes[i_aux].set_xticklabels(DateLabel,rotation=30,fontsize=12)
+        axes[i_aux].legend(facecolor='wheat',loc=2)
+        axes[i_aux].set_ylabel('Avg. time [min]')
+        i_aux += 1 # Update counter
         
     if weekly:
-        N_weeks = len(t_abs)//7 if last_years==-1 else int(last_years*365//7) # Number of days to be plotted
+        N_weeks = len(t_abs)//7 if last_years_weekly==-1 else int(last_years_weekly*365//7) # Number of days to be plotted
         N_spacing = 4 if N_weeks/4<15 else N_weeks//15 # Separation between date labels
-        fig, ax = plt.subplots(1,figsize=(wPlot,hPlot))
-        ax.grid(axis='y',alpha=alpha_grid)
-        ax.set_title("Weekly series",fontsize=18,color='black')      
-        ax.bar(date_weekly[-N_weeks:],t_abs_weekly[-N_weeks:],label='Abs',color=Color_abs)
-        ax.bar(date_weekly[-N_weeks:],t_card_weekly[-N_weeks:],bottom=t_abs_weekly[-N_weeks:],
+        axes[i_aux].grid(axis='y',alpha=alpha_grid)
+        axes[i_aux].set_title("Weekly series",fontsize=18,color='black')      
+        axes[i_aux].bar(date_weekly[-N_weeks:],t_abs_weekly[-N_weeks:],label='Abs',color=Color_abs)
+        axes[i_aux].bar(date_weekly[-N_weeks:],t_card_weekly[-N_weeks:],bottom=t_abs_weekly[-N_weeks:],
                label='Cardio',color=Color_cardio)
         DateLabel = date_weekly[-N_weeks::N_spacing] # Define date labels
         WeekTicks = [i*N_spacing for i in range(len(DateLabel))] # Adjust ticks accordingly
-        ax.set_facecolor("#111111")
-        ax.set_xticks(WeekTicks)
-        ax.set_xticklabels(DateLabel,rotation=30,fontsize=12)
-        ax.legend(facecolor='wheat')
-        ax.set_ylabel('Avg. weekly time [min]')
-        fig.tight_layout()
-        #plt.show()
+        axes[i_aux].set_facecolor("#111111")
+        axes[i_aux].set_xticks(WeekTicks)
+        axes[i_aux].set_xticklabels(DateLabel,rotation=30,fontsize=12)
+        axes[i_aux].legend(facecolor='wheat',loc=2)
+        axes[i_aux].set_ylabel('Avg. time [min]')
+        i_aux += 1 # Update counter
         
     if moonly:
-        N_moons = len(t_abs)//28 if last_years==-1 else int(last_years*365//28) # Number of days to be plotted
+        N_moons = len(t_abs)//28 if last_years_moonly==-1 else int(last_years_moonly*365//28) # Number of days to be plotted
         N_spacing = 1 if N_moons<15 else N_moons//15 # Separation between date labels
-        fig, ax = plt.subplots(1,figsize=(wPlot,hPlot))
-        ax.grid(axis='y',alpha=alpha_grid)
-        ax.set_title("Moonly series",fontsize=18,color='black')      
-        ax.bar(date_moonly[-N_moons:],t_abs_moonly[-N_moons:],label='Abs',color=Color_abs)
-        ax.bar(date_moonly[-N_moons:],t_card_moonly[-N_moons:],bottom=t_abs_moonly[-N_moons:],
+        axes[i_aux].grid(axis='y',alpha=alpha_grid)
+        axes[i_aux].set_title("Moonly series",fontsize=18,color='black')      
+        axes[i_aux].bar(date_moonly[-N_moons:],t_abs_moonly[-N_moons:],label='Abs',color=Color_abs)
+        axes[i_aux].bar(date_moonly[-N_moons:],t_card_moonly[-N_moons:],bottom=t_abs_moonly[-N_moons:],
                label='Cardio',color=Color_cardio)
         DateLabel = date_moonly[-N_moons::N_spacing] # Define date labels
         MoonTicks = [i*N_spacing for i in range(len(DateLabel))] # Adjust ticks accordingly
-        ax.set_facecolor("#1e1e1e")
-        ax.set_xticks(MoonTicks)
-        ax.set_xticklabels(DateLabel,rotation=30,fontsize=12)
-        ax.legend(facecolor='wheat')
-        ax.set_ylabel('Avg. moonly time [min]')
-        fig.tight_layout()
-        #plt.show()
+        axes[i_aux].set_facecolor("#1e1e1e")
+        axes[i_aux].set_xticks(MoonTicks)
+        axes[i_aux].set_xticklabels(DateLabel,rotation=30,fontsize=12)
+        axes[i_aux].legend(facecolor='wheat',loc=2)
+        axes[i_aux].set_ylabel('Avg. time [min]')
+        i_aux += 1 # Update counter
         
     if quarterly:
-        N_quarts = len(t_abs)//90 if last_years==-1 else int(last_years*365//90) # Number of days to be plotted
+        N_quarts = len(t_abs)//90 if last_years_quarterly==-1 else int(last_years_quarterly*365//90) # Number of days to be plotted
         N_spacing = 1 if N_quarts<15 else N_quarts//15 # Separation between date labels
-        fig, ax = plt.subplots(1,figsize=(wPlot,hPlot))
-        ax.grid(axis='y',alpha=alpha_grid)
-        ax.set_title("Quarterly series",fontsize=18,color='black')      
-        ax.bar(date_quart[-N_quarts:],t_abs_quart[-N_quarts:],label='Abs',color=Color_abs)
-        ax.bar(date_quart[-N_quarts:],t_card_quart[-N_quarts:],bottom=t_abs_quart[-N_quarts:],
+        axes[i_aux].grid(axis='y',alpha=alpha_grid)
+        axes[i_aux].set_title("Quarterly series",fontsize=18,color='black')      
+        axes[i_aux].bar(date_quart[-N_quarts:],t_abs_quart[-N_quarts:],label='Abs',color=Color_abs)
+        axes[i_aux].bar(date_quart[-N_quarts:],t_card_quart[-N_quarts:],bottom=t_abs_quart[-N_quarts:],
                label='Cardio',color=Color_cardio)
         DateLabel = date_quart[-N_quarts::N_spacing] # Define date labels
         QuartTicks = [i*N_spacing for i in range(len(DateLabel))] # Adjust ticks accordingly
-        ax.set_facecolor("#1e1e1e")
-        ax.set_xticks(QuartTicks)
-        ax.set_xticklabels(DateLabel,rotation=30,fontsize=12)
-        ax.legend(facecolor='wheat')
-        ax.set_ylabel('Avg. quarterly time [min]')
-        fig.tight_layout()
-        #plt.show()
+        axes[i_aux].set_facecolor("#1e1e1e")
+        axes[i_aux].set_xticks(QuartTicks)
+        axes[i_aux].set_xticklabels(DateLabel,rotation=30,fontsize=12)
+        axes[i_aux].legend(facecolor='wheat',loc=2)
+        axes[i_aux].set_ylabel('Avg. time [min]')
+        i_aux += 1 # Update counter
+        
+    #fig.tight_layout()
+    #plt.subplots_adjust(left=0.125, bottom=0.9, right=0.1, top=0.9, wspace=0.2, hspace=0.2)
+    plt.show()
 
 # Obtain averages in week_days:
 def obtain_avg(input_list):
